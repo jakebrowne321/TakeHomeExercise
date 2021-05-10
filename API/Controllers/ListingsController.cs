@@ -16,6 +16,7 @@ namespace API.Controllers
 
         public ActionResult GetListings()
         {
+            var test = "";
             return Ok("TODO");
         }
     }
