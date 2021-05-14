@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
@@ -55,8 +56,7 @@ namespace API.Controllers
             public int StatusType { get; set; }
             public string DisplayPrice { get; set; }
             public string Title { get; set; }
-
-    
+            public string shortPrice { get; set; }
         }
 
 
@@ -67,6 +67,54 @@ namespace API.Controllers
 
         }
 
+        private string formatShortPrice(string displayPrice)
+        {
+            
+            //Remove all letters from Display Price
+            string cleanDisplayPrice = Regex.Replace(displayPrice, "[^0-9]", "");
+
+            
+            //if (cleanDisplayPrice.Contains("."))
+            //{
+            //    int index = cleanDisplayPrice.IndexOf(".");
+            //    if (index > 0)
+            //        cleanDisplayPrice = cleanDisplayPrice.Substring(0, index);
+            //}
+
+            if (cleanDisplayPrice == "")
+            {
+                return "Enquire for more info!";
+            }
+
+            long convertedDisplayPrice = long.Parse(cleanDisplayPrice);
+
+            if (convertedDisplayPrice < 1000)
+                return convertedDisplayPrice.ToString();
+
+            if (convertedDisplayPrice < 10000)
+                return String.Format("{0:#,.##}K", convertedDisplayPrice - 5);
+
+            if (convertedDisplayPrice < 100000)
+                return String.Format("{0:#,.#}K", convertedDisplayPrice - 50);
+
+            if (convertedDisplayPrice < 1000000)
+                return String.Format("{0:#,.}K", convertedDisplayPrice - 500);
+
+            if (convertedDisplayPrice < 10000000)
+                return String.Format("{0:#,,.##}M", convertedDisplayPrice - 5000);
+
+            if (convertedDisplayPrice < 100000000)
+                return String.Format("{0:#,,.#}M", convertedDisplayPrice - 50000);
+
+            if (convertedDisplayPrice < 1000000000)
+                return String.Format("{0:#,,.}M", convertedDisplayPrice - 500000);
+
+            return String.Format("{0:#,,,.##}B", convertedDisplayPrice - 5000000);
+
+         
+        }
+
+        
         public ActionResult GetListings(string suburb = null, string categoryType = null, string statusType = null, string skip = null, string take = null)
         {
             string initialQuery = "SELECT *, count(*) OVER() AS full_count FROM Listings";
@@ -212,6 +260,7 @@ namespace API.Controllers
                 listing.StatusType = (int)rdr["StatusType"];
                 listing.DisplayPrice = (string)rdr["DisplayPrice"];
                 listing.Title = (string)rdr["Title"] ?? null;
+                listing.shortPrice = formatShortPrice(listing.DisplayPrice).Insert(0,"$");
                 listingArrray.Add(listing);
             };
 
