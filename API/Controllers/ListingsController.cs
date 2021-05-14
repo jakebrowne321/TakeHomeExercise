@@ -114,7 +114,8 @@ namespace API.Controllers
          
         }
 
-        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "*" })]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "suburb" })]
+
         public ActionResult GetListings(string suburb = null, string categoryType = null, string statusType = null, string skip = null, string take = null)
         {
             string initialQuery = "SELECT *, count(*) OVER() AS full_count FROM Listings";
